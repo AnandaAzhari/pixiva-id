@@ -20,6 +20,12 @@ Focus on a stable, kiosk-first experience for a single Risol MamQi activation:
 - QR download and WhatsApp sharing
 - Fullscreen kiosk experience
 
+## Sprint 2
+
+### Phase 4: Welcome to Camera Permission Flow
+
+Status: Completed
+
 ## Future Direction
 
 Potential future product capabilities include:
