@@ -26,6 +26,10 @@ Focus on a stable, kiosk-first experience for a single Risol MamQi activation:
 
 Status: Completed
 
+### Phase 5: Camera Permission to Preview Flow
+
+Status: Completed
+
 ## Future Direction
 
 Potential future product capabilities include:
