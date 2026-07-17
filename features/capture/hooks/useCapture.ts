@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { CAPTURE_CONFIG } from "@/features/capture/config/captureConfig";
 import {
   canvasToBlob,
   captureVideoFrame,
@@ -12,6 +13,8 @@ import type {
   CaptureResult,
   CaptureStatus,
 } from "@/features/capture/types/capture";
+
+export const captureCount = CAPTURE_CONFIG.captureCount;
 
 function createCaptureError(
   code: CaptureError["code"],
@@ -55,35 +58,60 @@ export function useCapture(): CaptureContext {
       setStatus("capturing");
 
       try {
-        const canvas = captureVideoFrame(video);
-        const blob = await canvasToBlob(canvas);
-        const result: CaptureResult = {
-          success: true,
-          blob,
-          width: canvas.width,
-          height: canvas.height,
-          error: null,
-        };
-
-        if (isMountedRef.current && operationId === operationIdRef.current) {
-          setStatus("success");
-        }
-
-        return result;
-      } catch (error) {
-        const result: CaptureResult = {
+        let lastResult: CaptureResult = {
           success: false,
           blob: null,
           width: 0,
           height: 0,
-          error: createCaptureError("unknown", error),
+          error: {
+            code: "unknown",
+            message: "Unable to capture image.",
+          },
         };
 
-        if (isMountedRef.current && operationId === operationIdRef.current) {
+        // Capture sequence foundation. Iteration count is sourced from
+        // CAPTURE_CONFIG.captureCount so the loop config is centralised, but it
+        // is currently forced to a single iteration so behavior matches the
+        // original single-capture flow.
+        const configuredCount = CAPTURE_CONFIG.captureCount;
+        const iterations = Math.min(1, Math.max(0, configuredCount));
+        for (let index = 0; index < iterations; index += 1) {
+          try {
+            const canvas = captureVideoFrame(video);
+            const blob = await canvasToBlob(canvas);
+            lastResult = {
+              success: true,
+              blob,
+              width: canvas.width,
+              height: canvas.height,
+              error: null,
+            };
+          } catch (error) {
+            lastResult = {
+              success: false,
+              blob: null,
+              width: 0,
+              height: 0,
+              error: createCaptureError("unknown", error),
+            };
+            break;
+          }
+        }
+
+        if (
+          isMountedRef.current &&
+          operationId === operationIdRef.current &&
+          lastResult.success
+        ) {
+          setStatus("success");
+        } else if (
+          isMountedRef.current &&
+          operationId === operationIdRef.current
+        ) {
           setStatus("error");
         }
 
-        return result;
+        return lastResult;
       } finally {
         if (operationId === operationIdRef.current) {
           isCapturingRef.current = false;
