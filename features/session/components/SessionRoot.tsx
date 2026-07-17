@@ -140,7 +140,27 @@ export function SessionRoot() {
   }
 
   if (currentState === "FRAME_EDITOR" && frameEditorImageUrl !== null) {
-    return <CaptureCanvas imageUrl={frameEditorImageUrl} />;
+    return (
+      <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col justify-center gap-6 px-5 py-8 sm:px-8">
+        <CaptureCanvas imageUrl={frameEditorImageUrl} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <button
+            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1"
+            disabled
+            type="button"
+          >
+            Retake
+          </button>
+          <button
+            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1"
+            disabled
+            type="button"
+          >
+            Continue
+          </button>
+        </div>
+      </main>
+    );
   }
 
   if (currentState === "WELCOME") {
