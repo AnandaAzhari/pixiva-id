@@ -14,6 +14,6 @@ export interface SessionContext {
   currentState: SessionState;
   goTo: (state: SessionState) => void;
   reset: () => void;
-  setCaptureResult: (result: CaptureResult) => void;
+  setCaptureResult: (result: CaptureResult | null) => void;
   captureResult: CaptureResult | null;
 }

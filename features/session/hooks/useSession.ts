@@ -24,9 +24,12 @@ export function useSession(): SessionContext {
     setCaptureResultState(null);
   }, []);
 
-  const setCaptureResult = useCallback((result: CaptureResult): void => {
-    setCaptureResultState(result);
-  }, []);
+  const setCaptureResult = useCallback(
+    (result: CaptureResult | null): void => {
+      setCaptureResultState(result);
+    },
+    [],
+  );
 
   return { currentState, goTo, reset, setCaptureResult, captureResult };
 }

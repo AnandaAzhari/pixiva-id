@@ -69,6 +69,11 @@ export function SessionRoot() {
     });
   }, [captureFrame, goTo, setCaptureResult]);
 
+  const handleRetake = useCallback((): void => {
+    setCaptureResult(null);
+    goTo("CAMERA_PREVIEW");
+  }, [goTo, setCaptureResult]);
+
   useEffect(() => {
     if (currentState !== "CAMERA_PERMISSION" || hasInitializedCameraRef.current) {
       return;
@@ -145,14 +150,14 @@ export function SessionRoot() {
         <CaptureCanvas imageUrl={frameEditorImageUrl} />
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
-            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1"
-            disabled
+            className="min-h-16 w-full rounded-2xl bg-amber-600 px-6 py-4 text-xl font-bold text-white shadow-lg shadow-amber-900/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-700 active:bg-amber-800 sm:w-auto sm:flex-1 sm:text-2xl"
+            onClick={handleRetake}
             type="button"
           >
             Retake
           </button>
           <button
-            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1"
+            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
             disabled
             type="button"
           >
