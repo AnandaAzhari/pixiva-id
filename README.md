@@ -1,4 +1,4 @@
-# MamQi Booth
+# PIXIVA.ID
 
 MamQi Booth is a web-based photobooth application for promoting Risol MamQi. It is designed to run on an iPad Mini 6 today and evolve into a commercial rental photobooth platform.
 
