@@ -75,8 +75,8 @@ export function SessionRoot() {
   }, [goTo, setCaptureResult]);
 
   const handleContinue = useCallback((): void => {
-    // Placeholder: real navigation will be implemented in the next phase.
-  }, []);
+    goTo("DOWNLOAD");
+  }, [goTo]);
 
   useEffect(() => {
     if (currentState !== "CAMERA_PERMISSION" || hasInitializedCameraRef.current) {
@@ -166,6 +166,44 @@ export function SessionRoot() {
             type="button"
           >
             Continue
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (currentState === "DOWNLOAD" && frameEditorImageUrl !== null) {
+    return (
+      <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col justify-center gap-6 px-5 py-8 sm:px-8">
+        <CaptureCanvas imageUrl={frameEditorImageUrl} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+          <button
+            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
+            disabled
+            type="button"
+          >
+            Download
+          </button>
+          <button
+            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
+            disabled
+            type="button"
+          >
+            Print
+          </button>
+          <button
+            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
+            disabled
+            type="button"
+          >
+            Share
+          </button>
+          <button
+            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
+            disabled
+            type="button"
+          >
+            Done
           </button>
         </div>
       </main>
