@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CameraPermission } from "@/features/camera/components/CameraPermission";
 import { CameraPreview } from "@/features/camera/components/CameraPreview";
@@ -13,6 +13,8 @@ import { useSession } from "@/features/session/hooks/useSession";
 
 const DOWNLOAD_FILENAME = "pixiva-photo.jpg";
 const PRINT_WINDOW_FEATURES = "width=800,height=600";
+const SHARE_MESSAGE =
+  "Sharing will be available once Pixiva.ID is deployed online.";
 
 export function SessionRoot() {
   const { capture: captureFrame } = useCapture();
@@ -33,6 +35,7 @@ export function SessionRoot() {
   const hasInitializedCameraRef = useRef(false);
   const hasStartedCameraRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [shareNotice, setShareNotice] = useState<string | null>(null);
 
   const frameEditorImageUrl = useMemo(() => {
     if (captureResult?.success !== true) {
@@ -51,6 +54,20 @@ export function SessionRoot() {
       URL.revokeObjectURL(frameEditorImageUrl);
     };
   }, [frameEditorImageUrl]);
+
+  useEffect(() => {
+    if (shareNotice === null) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShareNotice(null);
+    }, 4000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [shareNotice]);
 
   const handleCountdownFinished = useCallback((): void => {
     const videoElement = videoRef.current;
@@ -132,6 +149,10 @@ export function SessionRoot() {
 
     printWindow.document.body.appendChild(imageElement);
   }, [frameEditorImageUrl]);
+
+  const handleShare = useCallback((): void => {
+    setShareNotice(SHARE_MESSAGE);
+  }, []);
 
   useEffect(() => {
     if (currentState !== "CAMERA_PERMISSION" || hasInitializedCameraRef.current) {
@@ -229,7 +250,7 @@ export function SessionRoot() {
 
   if (currentState === "DOWNLOAD" && frameEditorImageUrl !== null) {
     return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col justify-center gap-6 px-5 py-8 sm:px-8">
+      <main className="relative mx-auto flex min-h-dvh w-full max-w-xl flex-col justify-center gap-6 px-5 py-8 sm:px-8">
         <CaptureCanvas imageUrl={frameEditorImageUrl} />
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
           <button
@@ -247,8 +268,8 @@ export function SessionRoot() {
             Print
           </button>
           <button
-            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
-            disabled
+            className="min-h-16 w-full rounded-2xl bg-amber-600 px-6 py-4 text-xl font-bold text-white shadow-lg shadow-amber-900/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-700 active:bg-amber-800 sm:w-auto sm:flex-1 sm:text-2xl"
+            onClick={handleShare}
             type="button"
           >
             Share
@@ -261,6 +282,17 @@ export function SessionRoot() {
             Done
           </button>
         </div>
+        {shareNotice !== null && (
+          <div
+            aria-live="polite"
+            className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-5"
+            role="status"
+          >
+            <span className="rounded-2xl bg-slate-900/90 px-5 py-3 text-center text-base font-semibold text-white shadow-lg sm:text-lg">
+              {shareNotice}
+            </span>
+          </div>
+        )}
       </main>
     );
   }
