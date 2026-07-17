@@ -6,7 +6,7 @@ import type { CaptureResult } from "@/features/capture/types/capture";
 import type { SessionContext, SessionState } from "@/features/session/types/session";
 
 // Storage shape: a captured photo is the single successful capture result.
-type CapturedPhoto = Extract<CaptureResult, { success: true }>;
+export type CapturedPhoto = Extract<CaptureResult, { success: true }>;
 
 function asCapturedPhoto(result: CaptureResult | null): CapturedPhoto | null {
   if (result === null) {
@@ -41,8 +41,12 @@ export function useSession(): SessionContext {
     [],
   );
 
-  const captureResult: CaptureResult | null =
-    capturedPhotos.length === 0 ? null : capturedPhotos[0];
-
-  return { currentState, goTo, reset, setCaptureResult, captureResult };
+  return {
+    captureResult: capturedPhotos[0] ?? null,
+    capturedPhotos,
+    currentState,
+    goTo,
+    reset,
+    setCaptureResult,
+  };
 }

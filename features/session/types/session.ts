@@ -1,4 +1,5 @@
 import type { CaptureResult } from "@/features/capture/types/capture";
+import type { CapturedPhoto } from "@/features/session/hooks/useSession";
 
 export type SessionState =
   | "WELCOME"
@@ -15,5 +16,6 @@ export interface SessionContext {
   goTo: (state: SessionState) => void;
   reset: () => void;
   setCaptureResult: (result: CaptureResult | null) => void;
+  capturedPhotos: CapturedPhoto[];
   captureResult: CaptureResult | null;
 }
