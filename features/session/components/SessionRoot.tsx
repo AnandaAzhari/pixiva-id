@@ -12,6 +12,7 @@ import { WelcomeScreen } from "@/features/session/components/WelcomeScreen";
 import { useSession } from "@/features/session/hooks/useSession";
 
 const DOWNLOAD_FILENAME = "pixiva-photo.jpg";
+const PRINT_WINDOW_FEATURES = "width=800,height=600";
 
 export function SessionRoot() {
   const { capture: captureFrame } = useCapture();
@@ -97,6 +98,40 @@ export function SessionRoot() {
 
     URL.revokeObjectURL(downloadUrl);
   }, [captureResult]);
+
+  const handlePrint = useCallback((): void => {
+    if (frameEditorImageUrl === null) {
+      return;
+    }
+
+    const printWindow = window.open("", "_blank", PRINT_WINDOW_FEATURES);
+
+    if (printWindow === null) {
+      return;
+    }
+
+    const imageElement = printWindow.document.createElement("img");
+    imageElement.src = frameEditorImageUrl;
+    imageElement.alt = "Captured photo";
+    imageElement.style.maxWidth = "100%";
+    imageElement.style.height = "auto";
+
+    imageElement.addEventListener(
+      "load",
+      () => {
+        printWindow.focus();
+
+        try {
+          printWindow.print();
+        } finally {
+          printWindow.close();
+        }
+      },
+      { once: true },
+    );
+
+    printWindow.document.body.appendChild(imageElement);
+  }, [frameEditorImageUrl]);
 
   useEffect(() => {
     if (currentState !== "CAMERA_PERMISSION" || hasInitializedCameraRef.current) {
@@ -205,8 +240,8 @@ export function SessionRoot() {
             Download
           </button>
           <button
-            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
-            disabled
+            className="min-h-16 w-full rounded-2xl bg-amber-600 px-6 py-4 text-xl font-bold text-white shadow-lg shadow-amber-900/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-700 active:bg-amber-800 sm:w-auto sm:flex-1 sm:text-2xl"
+            onClick={handlePrint}
             type="button"
           >
             Print
