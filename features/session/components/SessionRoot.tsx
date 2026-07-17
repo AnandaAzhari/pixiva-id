@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 
 import { CameraPermission } from "@/features/camera/components/CameraPermission";
-import { CameraStage } from "@/features/camera/components/CameraStage";
+import { CameraPreview } from "@/features/camera/components/CameraPreview";
 import { useCamera } from "@/features/camera/hooks/useCamera";
+import { CountdownSession } from "@/features/countdown/components/CountdownSession";
 import { WelcomeScreen } from "@/features/session/components/WelcomeScreen";
 import { useSession } from "@/features/session/hooks/useSession";
 
@@ -75,11 +76,20 @@ export function SessionRoot() {
     );
 
     return (
-      <CameraStage
+      <CameraPreview
         isFrontCamera={selectedDevice?.facing === "user"}
+        onTakePhoto={() => goTo("COUNTDOWN")}
         stream={stream}
       />
     );
+  }
+
+  if (currentState === "COUNTDOWN") {
+    return <CountdownSession onFinished={() => goTo("CAPTURE")} />;
+  }
+
+  if (currentState === "CAPTURE") {
+    return null;
   }
 
   if (currentState === "WELCOME") {
