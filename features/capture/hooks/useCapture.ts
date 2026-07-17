@@ -69,12 +69,9 @@ export function useCapture(): CaptureContext {
           },
         };
 
-        // Capture sequence foundation. Iteration count is sourced from
-        // CAPTURE_CONFIG.captureCount so the loop config is centralised, but it
-        // is currently forced to a single iteration so behavior matches the
-        // original single-capture flow.
-        const configuredCount = CAPTURE_CONFIG.captureCount;
-        const iterations = Math.min(1, Math.max(0, configuredCount));
+        // Capture sequence foundation. Iterates using CAPTURE_CONFIG.captureCount;
+        // exits as soon as a capture succeeds so behavior remains a single photo.
+        const iterations = Math.max(0, CAPTURE_CONFIG.captureCount);
         for (let index = 0; index < iterations; index += 1) {
           try {
             const canvas = captureVideoFrame(video);
@@ -86,6 +83,7 @@ export function useCapture(): CaptureContext {
               height: canvas.height,
               error: null,
             };
+            break;
           } catch (error) {
             lastResult = {
               success: false,
