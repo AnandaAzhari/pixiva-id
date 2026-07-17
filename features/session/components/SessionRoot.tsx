@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { CameraPermission } from "@/features/camera/components/CameraPermission";
 import { CameraPreview } from "@/features/camera/components/CameraPreview";
 import { useCamera } from "@/features/camera/hooks/useCamera";
+import { CaptureCanvas } from "@/features/capture/components/CaptureCanvas";
 import { useCapture } from "@/features/capture/hooks/useCapture";
 import { CountdownSession } from "@/features/countdown/components/CountdownSession";
 import { WelcomeScreen } from "@/features/session/components/WelcomeScreen";
@@ -12,7 +13,7 @@ import { useSession } from "@/features/session/hooks/useSession";
 
 export function SessionRoot() {
   const { capture: captureFrame } = useCapture();
-  const { currentState, goTo, setCaptureResult } = useSession();
+  const { captureResult, currentState, goTo, setCaptureResult } = useSession();
   const {
     devices,
     error,
@@ -29,6 +30,24 @@ export function SessionRoot() {
   const hasInitializedCameraRef = useRef(false);
   const hasStartedCameraRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const frameEditorImageUrl = useMemo(() => {
+    if (captureResult?.success !== true) {
+      return null;
+    }
+
+    return URL.createObjectURL(captureResult.blob);
+  }, [captureResult]);
+
+  useEffect(() => {
+    if (frameEditorImageUrl === null) {
+      return;
+    }
+
+    return () => {
+      URL.revokeObjectURL(frameEditorImageUrl);
+    };
+  }, [frameEditorImageUrl]);
 
   const handleCountdownFinished = useCallback((): void => {
     const videoElement = videoRef.current;
@@ -118,6 +137,10 @@ export function SessionRoot() {
 
   if (currentState === "CAPTURE") {
     return null;
+  }
+
+  if (currentState === "FRAME_EDITOR" && frameEditorImageUrl !== null) {
+    return <CaptureCanvas imageUrl={frameEditorImageUrl} />;
   }
 
   if (currentState === "WELCOME") {
