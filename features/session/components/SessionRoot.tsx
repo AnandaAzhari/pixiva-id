@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { CameraPermission } from "@/features/camera/components/CameraPermission";
 import { CameraPreview } from "@/features/camera/components/CameraPreview";
 import { useCamera } from "@/features/camera/hooks/useCamera";
+import { useCapture } from "@/features/capture/hooks/useCapture";
 import { CountdownSession } from "@/features/countdown/components/CountdownSession";
 import { WelcomeScreen } from "@/features/session/components/WelcomeScreen";
 import { useSession } from "@/features/session/hooks/useSession";
 
 export function SessionRoot() {
-  const { currentState, goTo } = useSession();
+  const { capture: captureFrame } = useCapture();
+  const { currentState, goTo, setCaptureResult } = useSession();
   const {
     devices,
     error,
@@ -26,6 +28,27 @@ export function SessionRoot() {
   } = useCamera();
   const hasInitializedCameraRef = useRef(false);
   const hasStartedCameraRef = useRef(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleCountdownFinished = useCallback((): void => {
+    const videoElement = videoRef.current;
+
+    if (videoElement === null) {
+      goTo("CAMERA_PREVIEW");
+      return;
+    }
+
+    void captureFrame(videoElement).then((result) => {
+      setCaptureResult(result);
+
+      if (result.success) {
+        goTo("FRAME_EDITOR");
+        return;
+      }
+
+      goTo("CAMERA_PREVIEW");
+    });
+  }, [captureFrame, goTo, setCaptureResult]);
 
   useEffect(() => {
     if (currentState !== "CAMERA_PERMISSION" || hasInitializedCameraRef.current) {
@@ -70,22 +93,27 @@ export function SessionRoot() {
     );
   }
 
-  if (currentState === "CAMERA_PREVIEW" && stream !== null) {
+  if (
+    (currentState === "CAMERA_PREVIEW" || currentState === "COUNTDOWN") &&
+    stream !== null
+  ) {
     const selectedDevice = devices.find(
       (device) => device.id === selectedDeviceId,
     );
 
     return (
-      <CameraPreview
-        isFrontCamera={selectedDevice?.facing === "user"}
-        onTakePhoto={() => goTo("COUNTDOWN")}
-        stream={stream}
-      />
+      <>
+        <CameraPreview
+          isFrontCamera={selectedDevice?.facing === "user"}
+          onTakePhoto={() => goTo("COUNTDOWN")}
+          stream={stream}
+          videoRef={videoRef}
+        />
+        {currentState === "COUNTDOWN" && (
+          <CountdownSession onFinished={handleCountdownFinished} />
+        )}
+      </>
     );
-  }
-
-  if (currentState === "COUNTDOWN") {
-    return <CountdownSession onFinished={() => goTo("CAPTURE")} />;
   }
 
   if (currentState === "CAPTURE") {

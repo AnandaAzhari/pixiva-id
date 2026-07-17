@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 
+import type { CaptureResult } from "@/features/capture/types/capture";
 import type { SessionContext, SessionState } from "@/features/session/types/session";
 
 const INITIAL_SESSION_STATE: SessionState = "WELCOME";
@@ -10,6 +11,9 @@ export function useSession(): SessionContext {
   const [currentState, setCurrentState] = useState<SessionState>(
     INITIAL_SESSION_STATE,
   );
+  const [captureResult, setCaptureResultState] = useState<CaptureResult | null>(
+    null,
+  );
 
   const goTo = useCallback((state: SessionState): void => {
     setCurrentState(state);
@@ -17,7 +21,12 @@ export function useSession(): SessionContext {
 
   const reset = useCallback((): void => {
     setCurrentState(INITIAL_SESSION_STATE);
+    setCaptureResultState(null);
   }, []);
 
-  return { currentState, goTo, reset };
+  const setCaptureResult = useCallback((result: CaptureResult): void => {
+    setCaptureResultState(result);
+  }, []);
+
+  return { currentState, goTo, reset, setCaptureResult, captureResult };
 }

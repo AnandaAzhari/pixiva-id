@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 interface CameraStageProps {
   isFrontCamera: boolean;
   stream: MediaStream;
+  videoRef?: RefObject<HTMLVideoElement | null>;
 }
 
-export function CameraStage({ isFrontCamera, stream }: CameraStageProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+export function CameraStage({ isFrontCamera, stream, videoRef }: CameraStageProps) {
+  const internalVideoRef = useRef<HTMLVideoElement>(null);
+  const resolvedVideoRef = videoRef ?? internalVideoRef;
 
   useEffect(() => {
-    const videoElement = videoRef.current;
+    const videoElement = resolvedVideoRef.current;
 
     if (videoElement === null) {
       return;
@@ -24,7 +26,7 @@ export function CameraStage({ isFrontCamera, stream }: CameraStageProps) {
         videoElement.srcObject = null;
       }
     };
-  }, [stream]);
+  }, [resolvedVideoRef, stream]);
 
   return (
     <section
@@ -39,7 +41,7 @@ export function CameraStage({ isFrontCamera, stream }: CameraStageProps) {
         }`}
         muted
         playsInline
-        ref={videoRef}
+        ref={resolvedVideoRef}
       />
       <div
         aria-hidden="true"
