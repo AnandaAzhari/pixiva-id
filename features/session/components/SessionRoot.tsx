@@ -11,6 +11,8 @@ import { CountdownSession } from "@/features/countdown/components/CountdownSessi
 import { WelcomeScreen } from "@/features/session/components/WelcomeScreen";
 import { useSession } from "@/features/session/hooks/useSession";
 
+const DOWNLOAD_FILENAME = "pixiva-photo.jpg";
+
 export function SessionRoot() {
   const { capture: captureFrame } = useCapture();
   const { captureResult, currentState, goTo, setCaptureResult } = useSession();
@@ -77,6 +79,24 @@ export function SessionRoot() {
   const handleContinue = useCallback((): void => {
     goTo("DOWNLOAD");
   }, [goTo]);
+
+  const handleDownload = useCallback((): void => {
+    if (captureResult?.success !== true) {
+      return;
+    }
+
+    const downloadUrl = URL.createObjectURL(captureResult.blob);
+    const anchor = document.createElement("a");
+    anchor.href = downloadUrl;
+    anchor.download = DOWNLOAD_FILENAME;
+    anchor.rel = "noopener";
+
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
+    URL.revokeObjectURL(downloadUrl);
+  }, [captureResult]);
 
   useEffect(() => {
     if (currentState !== "CAMERA_PERMISSION" || hasInitializedCameraRef.current) {
@@ -178,8 +198,8 @@ export function SessionRoot() {
         <CaptureCanvas imageUrl={frameEditorImageUrl} />
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
           <button
-            className="min-h-16 w-full rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-500 sm:w-auto sm:flex-1 sm:text-2xl"
-            disabled
+            className="min-h-16 w-full rounded-2xl bg-amber-600 px-6 py-4 text-xl font-bold text-white shadow-lg shadow-amber-900/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-700 active:bg-amber-800 sm:w-auto sm:flex-1 sm:text-2xl"
+            onClick={handleDownload}
             type="button"
           >
             Download
