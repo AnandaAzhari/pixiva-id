@@ -107,11 +107,16 @@ export function SessionRoot() {
     }
   }, [isConfirmingFinish]);
 
-  // Capture sequence foundation. Runs the capture action exactly once and
-  // resolves with the same CaptureResult the underlying hook returns.
+  // Capture sequence foundation. Performs exactly one capture, pushes the
+  // successful result into a local array, and returns the array.
   const runCaptureSequence = useCallback(
-    (video: HTMLVideoElement): Promise<CaptureResult> => {
-      return captureFrame(video);
+    async (video: HTMLVideoElement): Promise<CaptureResult[]> => {
+      const captures: CaptureResult[] = [];
+      const result = await captureFrame(video);
+      if (result.success) {
+        captures.push(result);
+      }
+      return captures;
     },
     [captureFrame],
   );
@@ -124,7 +129,14 @@ export function SessionRoot() {
       return;
     }
 
-    void runCaptureSequence(videoElement).then((result) => {
+    void runCaptureSequence(videoElement).then((captures) => {
+      const result = captures[0];
+
+      if (result === undefined) {
+        goTo("CAMERA_PREVIEW");
+        return;
+      }
+
       setCaptureResult(result);
 
       if (result.success) {
