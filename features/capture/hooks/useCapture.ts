@@ -68,30 +68,36 @@ export function useCapture(): CaptureContext {
             message: "Unable to capture image.",
           },
         };
+        const capturedLocally: CaptureResult[] = [];
 
-        // Capture sequence foundation. Iterates using CAPTURE_CONFIG.captureCount;
-        // exits as soon as a capture succeeds so behavior remains a single photo.
-        const iterations = Math.max(0, CAPTURE_CONFIG.captureCount);
+        // Capture sequence foundation. Iterates exactly twice and stores each
+        // successful capture in a local array; the first successful result is
+        // returned so behavior matches the original single-photo contract.
+        const iterations = 2;
         for (let index = 0; index < iterations; index += 1) {
           try {
             const canvas = captureVideoFrame(video);
             const blob = await canvasToBlob(canvas);
-            lastResult = {
+            const result: CaptureResult = {
               success: true,
               blob,
               width: canvas.width,
               height: canvas.height,
               error: null,
             };
+            capturedLocally.push(result);
+            lastResult = result;
             break;
           } catch (error) {
-            lastResult = {
+            const result: CaptureResult = {
               success: false,
               blob: null,
               width: 0,
               height: 0,
               error: createCaptureError("unknown", error),
             };
+            capturedLocally.push(result);
+            lastResult = result;
             break;
           }
         }

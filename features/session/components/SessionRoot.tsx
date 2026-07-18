@@ -7,6 +7,7 @@ import { CameraPreview } from "@/features/camera/components/CameraPreview";
 import { useCamera } from "@/features/camera/hooks/useCamera";
 import { CaptureCanvas } from "@/features/capture/components/CaptureCanvas";
 import { useCapture } from "@/features/capture/hooks/useCapture";
+import type { CaptureResult } from "@/features/capture/types/capture";
 import { CountdownSession } from "@/features/countdown/components/CountdownSession";
 import { WelcomeScreen } from "@/features/session/components/WelcomeScreen";
 import { useSession } from "@/features/session/hooks/useSession";
@@ -106,6 +107,15 @@ export function SessionRoot() {
     }
   }, [isConfirmingFinish]);
 
+  // Capture sequence foundation. Runs the capture action exactly once and
+  // resolves with the same CaptureResult the underlying hook returns.
+  const runCaptureSequence = useCallback(
+    (video: HTMLVideoElement): Promise<CaptureResult> => {
+      return captureFrame(video);
+    },
+    [captureFrame],
+  );
+
   const handleCountdownFinished = useCallback((): void => {
     const videoElement = videoRef.current;
 
@@ -114,7 +124,7 @@ export function SessionRoot() {
       return;
     }
 
-    void captureFrame(videoElement).then((result) => {
+    void runCaptureSequence(videoElement).then((result) => {
       setCaptureResult(result);
 
       if (result.success) {
@@ -124,7 +134,7 @@ export function SessionRoot() {
 
       goTo("CAMERA_PREVIEW");
     });
-  }, [captureFrame, goTo, setCaptureResult]);
+  }, [goTo, runCaptureSequence, setCaptureResult]);
 
   const handleRetake = useCallback((): void => {
     setCaptureResult(null);
